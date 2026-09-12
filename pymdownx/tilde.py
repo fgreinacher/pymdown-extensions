@@ -35,10 +35,10 @@ class DeleteSubExtension(Extension):
         """Initialize."""
 
         self.config = {
-            'smart_delete': [False, "Treat ~~connected~~words~~ intelligently - Default: True"],
+            'smart_delete': [False, "Treat ~~connected~~words~~ intelligently - Default: False"],
             'delete': [True, "Enable delete - Default: True"],
             'subscript': [True, "Enable subscript - Default: True"],
-            'no_space': [True, "Pandoc style 'no space' requirement"]
+            'no_space': [True, "Pandoc style 'no space' requirement - Default: True"]
         }
 
         super().__init__(*args, **kwargs)

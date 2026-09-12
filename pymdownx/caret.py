@@ -36,10 +36,10 @@ class InsertSupExtension(Extension):
         """Initialize."""
 
         self.config = {
-            'smart_insert': [False, "Treat ^^connected^^words^^ intelligently - Default: True"],
+            'smart_insert': [False, "Treat ^^connected^^words^^ intelligently - Default: False"],
             'insert': [True, "Enable insert - Default: True"],
             'superscript': [True, "Enable superscript - Default: True"],
-            'no_space': [True, "Pandoc style 'no space' requirement"]
+            'no_space': [True, "Pandoc style 'no space' requirement - Default: True"]
         }
 
         super().__init__(*args, **kwargs)
