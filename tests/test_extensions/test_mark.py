@@ -32,6 +32,8 @@ class TestMarkSmart(util.MdCase):
             Test: ==This will NOT all be marked== because of the placement of the center equal sings.==
 
             Test: ==This will all be marked= because of the token is less than that of the surrounding.==
+
+            =/=
             ''',
             '''
             <p>Test: == Won't mark ==</p>
@@ -41,6 +43,7 @@ class TestMarkSmart(util.MdCase):
             <p>Test: <mark>This will all be marked == because of the placement of the center equal sings.</mark></p>
             <p>Test: <mark>This will NOT all be marked</mark> because of the placement of the center equal sings.==</p>
             <p>Test: <mark>This will all be marked= because of the token is less than that of the surrounding.</mark></p>
+            <p>=/=</p>
             ''',  # noqa: E501
             True
         )
@@ -72,6 +75,8 @@ class TestMarkNoSmart(util.MdCase):
             Test: ==All will not=== be marked==
 
             Test: ==All will === be marked==
+
+            =/=
             ''',
             '''
             <p>Test: == Won't mark ==</p>
@@ -79,6 +84,7 @@ class TestMarkNoSmart(util.MdCase):
             <p>Test: <mark>All will = be marked</mark></p>
             <p>Test: <mark>All will not</mark>= be marked==</p>
             <p>Test: <mark>All will === be marked</mark></p>
+            <p>=/=</p>
             ''',
             True
         )
