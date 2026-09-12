@@ -429,7 +429,6 @@ class DelimiterProcessor(InlineProcessor):
                 flags=re.UNICODE
             )
 
-        self.bad = re.compile(fr'{etoken}+')
         return fr'{etoken}'
 
     def _build_element(
