@@ -301,6 +301,8 @@ class DelimiterProcessor(InlineProcessor):
         self.cache_index = 0
         self.cache_pos = 0
         self.cache_legacy_pos = -1
+        self.contains_space = [-1, -1]
+        self.contains_non_space = [-1, -1]
 
         self.tags = tags.split(',')
         self.double = len(self.tags) != 2 and double
@@ -318,6 +320,8 @@ class DelimiterProcessor(InlineProcessor):
         self.cache_index = 0
         self.cache_pos = 0
         self.cache_legacy_pos = -1
+        self.contains_space = [-1, -1]
+        self.contains_non_space = [-1, -1]
 
     def _build_patterns(self, token: str) -> str:
         """Build regular expression patterns."""
@@ -562,6 +566,45 @@ class DelimiterProcessor(InlineProcessor):
         self.increment_next_position(start, count, offset)
         return el, start + offset, end + offset
 
+    def check_space(self, data: str, s: int, e: int) -> bool:
+        """
+        Check if region contains space.
+
+        Grow a "good" region and "space" region representing general ranges that did or did not contain spaces.
+        If our region overlaps with one, assume are state is similar to theirs; otherwise, physically check
+        the region.
+        """
+
+        # Check if our region overlaps with checked ranges.
+        p1, p2 = self.contains_space
+        if s <= p1 and p2 <= e:
+            if p1 == -1 or s < p1:
+                self.contains_space[0] = s
+            if p2 == -1 or e > p2:
+                self.contains_space[1] = e
+            return True
+        p3, p4 = self.contains_non_space
+        if s <= p3 and p4 <= e:
+            if p3 == -1 or s < p4:
+                self.contains_non_space[0] = s
+            if p4 == -1 or e > p4:
+                self.contains_non_space[1] = e
+            return False
+        # Cannot determine if region contains space. Physically check.
+        has_space = self.SPACE.search(data, s, e) is not None
+        # Update are checked ranges.
+        if has_space:
+            if p1 == -1 or s < p1:
+                self.contains_space[0] = s
+            if p2 == -1 or e > p2:
+                self.contains_space[1] = e
+        else:
+            if p3 == -1 or s < p3:
+                self.contains_non_space[0] = s
+            if p4 == -1 or e > p4:
+                self.contains_non_space[1] = e
+        return has_space
+
     def handleMatch(  # type: ignore[override]
         self,
         m: re.Match[str],
@@ -649,7 +692,7 @@ class DelimiterProcessor(InlineProcessor):
                             okay = True
                             if (
                                 (no_space or self.single or current == 1) and
-                                self.SPACE.search(data[delimiter[1]:start])
+                                self.check_space(data, delimiter[1], start)
                             ):
                                 okay = False
                                 if stack:
@@ -737,7 +780,7 @@ class DelimiterProcessor(InlineProcessor):
                 ignore = False
                 # Reject end if the content's white space invalidates it.
                 if self.no_space:
-                    if (current == 1 or self.single) and self.SPACE.search(data[delimiter[1]:m2.start(0)]):
+                    if (current == 1 or self.single) and self.check_space(data, delimiter[1], start):
                         stack.append(delimiter)
                         ignore = True
 
@@ -772,7 +815,7 @@ class DelimiterProcessor(InlineProcessor):
             if is_start and (not self.double or current != 1):
                 # Start a new nested span, but avoid adding new spans if it no space requirement
                 # cannot be fulfilled. Abort if it is impossible to meet the requirement.
-                if self.no_space and (no_space or self.single) and self.SPACE.search(data[stack[-1][1]:start]):
+                if self.no_space and (no_space or self.single) and self.check_space(data, stack[-1][1], start):
                     if no_space > 1 or singles or self.single:
                         break
                     continue
