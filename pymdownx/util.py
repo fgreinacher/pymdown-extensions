@@ -754,7 +754,7 @@ class DelimiterProcessor(InlineProcessor):
                         current -= size
                         last -= size
                         de -= size
-                    if not self.double or last != 1:
+                    if not self.double or last > 1:
                         stack.append((ds, de, False, last))
 
                     # Bookkeeping for no space requirement
