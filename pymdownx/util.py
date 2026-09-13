@@ -575,22 +575,24 @@ class DelimiterProcessor(InlineProcessor):
         """
 
         # Check if our region overlaps with checked ranges.
+        # End should be the character position.
+        e -= 1
         p1, p2 = self.contains_space
-        if s <= p1 and p2 <= e:
+        if max(s, p1) <= min(e, p2):
             if p1 == -1 or s < p1:
                 self.contains_space[0] = s
             if p2 == -1 or e > p2:
                 self.contains_space[1] = e
             return True
         p3, p4 = self.contains_non_space
-        if s <= p3 and p4 <= e:
+        if max(s, p3) <= min(e, p4):
             if p3 == -1 or s < p4:
                 self.contains_non_space[0] = s
             if p4 == -1 or e > p4:
                 self.contains_non_space[1] = e
             return False
         # Cannot determine if region contains space. Physically check.
-        has_space = self.SPACE.search(data, s, e) is not None
+        has_space = self.SPACE.search(data, s, e + 1) is not None
         # Update are checked ranges.
         if has_space:
             if p1 == -1 or s < p1:
